@@ -2,8 +2,10 @@ package main
 
 import (
 	"golang-blog-api/component"
+	"golang-blog-api/component/uploadprovider"
 	"golang-blog-api/middleware"
 	"golang-blog-api/modules/category/categorytransport/gincategory"
+	"golang-blog-api/modules/upload/uploadtransport/ginupload"
 	"log"
 	"os"
 
@@ -13,13 +15,13 @@ import (
 	"gorm.io/gorm"
 )
 
-func runService(db *gorm.DB) error {
+func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider) error {
 	appCtx := component.NewAppContext(db)
 	r := gin.Default()
 	r.Use(middleware.Recover(appCtx))
 
 	v1 := r.Group("v1")
-
+	v1.POST("/upload", ginupload.Upload(appCtx))
 	categories := v1.Group("/categories")
 	{
 		categories.POST("", gincategory.Create(appCtx))
@@ -44,7 +46,15 @@ func main() {
 
 	db = db.Debug()
 
-	if err := runService(db); err != nil {
+	s3Provider := uploadprovider.NewS3Provider(
+		os.Getenv("S3_BUCKET_NAME"),
+		os.Getenv("S3_REGION"),
+		os.Getenv("S3_API_KEY"),
+		os.Getenv("S3_SECRET_KEY"),
+		os.Getenv("S3_DOMAIN"),
+	)
+
+	if err := runService(db, s3Provider); err != nil {
 		log.Fatalln("Error running service: ", err)
 	}
 }
