@@ -15,21 +15,22 @@ import (
 	"time"
 )
 
-type ImageStore interface {
-	Create(context context.Context, data *common.Image) error
+type CreateImageStorage interface {
+	CreateImage(context context.Context, data *common.Image) error
 }
 
 type uploadBiz struct {
 	provider uploadprovider.UploadProvider
-	imgStore ImageStore
+	imgStore CreateImageStorage
 }
 
-func NewUploadBiz(provider uploadprovider.UploadProvider, imgStore ImageStore) *uploadBiz {
+func NewUploadBiz(provider uploadprovider.UploadProvider, imgStore CreateImageStorage) *uploadBiz {
 	return &uploadBiz{provider: provider, imgStore: imgStore}
 }
 
 func (biz *uploadBiz) Upload(ctx context.Context, data []byte, folder, fileName string) (*common.Image, error) {
 	fileBytes := bytes.NewBuffer(data)
+
 	w, h, err := getImageDimension(fileBytes)
 
 	if err != nil {
@@ -40,21 +41,24 @@ func (biz *uploadBiz) Upload(ctx context.Context, data []byte, folder, fileName 
 		folder = "img"
 	}
 
-	fileExt := filepath.Ext(fileName) // "img.jpg" => ".jpg"
-	fileName = fmt.Sprintf("%d%s", time.Now().Nanosecond(), fileExt)
+	fileExt := filepath.Ext(fileName)                                // "img.jpg" => ".jpg"
+	fileName = fmt.Sprintf("%d%s", time.Now().Nanosecond(), fileExt) // 9129324893248.jpg
 
 	img, err := biz.provider.SaveFileUploaded(ctx, data, fmt.Sprintf("%s/%s", folder, fileName))
+
 	if err != nil {
 		return nil, uploadmodel.ErrCannotSaveFile(err)
 	}
 
 	img.Width = w
 	img.Height = h
+	//img.CloudName = "s3" // should be set in provider
 	img.Extension = fileExt
 
-	// if err := biz.imgStore.Create(ctx, img); err != nil {
-	// 	return nil, uploadmodel.ErrCannotSaveFile(err)
-	// }
+	//if err := biz.imgStore.CreateImage(ctx, img); err != nil {
+	//	// delete img on S3
+	//	return nil, uploadmodel.ErrCannotSaveFile(err)
+	//}
 
 	return img, nil
 }

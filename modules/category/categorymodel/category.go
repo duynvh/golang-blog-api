@@ -15,6 +15,10 @@ func (Category) TableName() string {
 	return "categories"
 }
 
+func (data *Category) Mask(isAdmin bool) {
+	data.GenUID(common.DBTypeCategory)
+}
+
 var (
 	ErrCategoryNameCannotBeEmpty = common.NewCustomError(nil, "category name can't be blank", "ErrCategoryNameCannotBeEmpty")
 	ErrCategoryNameIsTooLong     = common.NewCustomError(nil, "category name is too long", "ErrCategoryNameIsTooLong")

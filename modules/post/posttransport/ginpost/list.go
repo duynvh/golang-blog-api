@@ -1,11 +1,11 @@
-package gincategory
+package ginpost
 
 import (
 	"golang-blog-api/common"
 	"golang-blog-api/component"
-	"golang-blog-api/modules/category/categorybiz"
-	"golang-blog-api/modules/category/categorymodel"
-	"golang-blog-api/modules/category/categorystore"
+	"golang-blog-api/modules/post/postbiz"
+	"golang-blog-api/modules/post/postmodel"
+	"golang-blog-api/modules/post/poststore"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +13,7 @@ import (
 
 func List(appCtx component.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var filter categorymodel.Filter
+		var filter postmodel.Filter
 
 		if err := c.ShouldBind(&filter); err != nil {
 			panic(common.ErrInvalidRequest(err))
@@ -26,8 +26,8 @@ func List(appCtx component.AppContext) gin.HandlerFunc {
 
 		paging.Fullfil()
 
-		store := categorystore.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := categorybiz.NewListBiz(store)
+		store := poststore.NewSQLStore(appCtx.GetMainDBConnection())
+		biz := postbiz.NewListBiz(store)
 
 		result, err := biz.List(c.Request.Context(), &filter, &paging)
 
@@ -37,6 +37,10 @@ func List(appCtx component.AppContext) gin.HandlerFunc {
 
 		for i := range result {
 			result[i].Mask(false)
+
+			if i == len(result)-1 {
+				paging.NextCursor = result[i].FakeId.String()
+			}
 		}
 
 		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filter))

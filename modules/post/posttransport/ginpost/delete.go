@@ -1,4 +1,4 @@
-package gincategory
+package ginpost
 
 import (
 	"golang-blog-api/common"

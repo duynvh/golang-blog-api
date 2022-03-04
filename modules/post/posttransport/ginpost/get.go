@@ -1,10 +1,10 @@
-package gincategory
+package ginpost
 
 import (
 	"golang-blog-api/common"
 	"golang-blog-api/component"
-	"golang-blog-api/modules/category/categorybiz"
-	"golang-blog-api/modules/category/categorystore"
+	"golang-blog-api/modules/post/postbiz"
+	"golang-blog-api/modules/post/poststore"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,16 +18,14 @@ func Get(appCtx component.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		store := categorystore.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := categorybiz.NewGetBiz(store)
+		store := poststore.NewSQLStore(appCtx.GetMainDBConnection())
+		biz := postbiz.NewGetBiz(store)
 
 		data, err := biz.Get(c.Request.Context(), int(uid.GetLocalID()))
 
 		if err != nil {
 			panic(err)
 		}
-
-		data.Mask(false)
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data))
 	}
