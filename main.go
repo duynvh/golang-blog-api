@@ -5,6 +5,7 @@ import (
 	"golang-blog-api/component/uploadprovider"
 	"golang-blog-api/middleware"
 	"golang-blog-api/modules/category/categorytransport/gincategory"
+	"golang-blog-api/modules/favorite/favoritetransport/ginfavorite"
 	"golang-blog-api/modules/post/posttransport/ginpost"
 	"golang-blog-api/modules/upload/uploadtransport/ginupload"
 	"golang-blog-api/modules/user/usertransport/ginuser"
@@ -27,6 +28,7 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey
 	v1.POST("/register", ginuser.Register(appCtx))
 	v1.POST("/login", ginuser.Login(appCtx))
 	v1.GET("/profile", middleware.RequireAuth(appCtx), ginuser.GetProfile(appCtx))
+	v1.GET("/favorited-posts", middleware.RequireAuth(appCtx), ginfavorite.ListFavoritedPostsOfAUser(appCtx))
 
 	categories := v1.Group("/categories", middleware.RequireAuth(appCtx))
 	{
@@ -44,6 +46,9 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey
 		posts.GET("", ginpost.List(appCtx))
 		posts.PATCH("/:id", ginpost.Update(appCtx))
 		posts.DELETE("/:id", ginpost.Delete(appCtx))
+		posts.POST("/:id/favorite", middleware.RequireAuth(appCtx), ginfavorite.Favorite(appCtx))
+		posts.DELETE("/:id/unfavorite", middleware.RequireAuth(appCtx), ginfavorite.Unfavorite(appCtx))
+		posts.GET("/:id/favorited-users", middleware.RequireAuth(appCtx), ginfavorite.ListUsersFavoritedAPost(appCtx))
 	}
 
 	return r.Run()
