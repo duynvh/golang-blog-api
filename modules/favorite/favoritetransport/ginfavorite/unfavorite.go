@@ -5,6 +5,7 @@ import (
 	"golang-blog-api/component"
 	"golang-blog-api/modules/favorite/favoritebiz"
 	"golang-blog-api/modules/favorite/favoritestore"
+	"golang-blog-api/modules/post/poststore"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,8 @@ func Unfavorite(appCtx component.AppContext) gin.HandlerFunc {
 		userId := requester.GetUserId()
 
 		store := favoritestore.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := favoritebiz.NewUnfavoriteBiz(store)
+		decStore := poststore.NewSQLStore(appCtx.GetMainDBConnection())
+		biz := favoritebiz.NewUnfavoriteBiz(store, decStore)
 
 		if err := biz.Unfavorite(c.Request.Context(), userId, int(postId.GetLocalID())); err != nil {
 			panic(err)

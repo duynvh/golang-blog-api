@@ -3,6 +3,7 @@ package favoritebiz
 import (
 	"context"
 	"golang-blog-api/common"
+	"golang-blog-api/component/asyncjob"
 	"golang-blog-api/modules/favorite/favoritemodel"
 	"golang-blog-api/modules/post/postmodel"
 )
@@ -22,6 +23,8 @@ type PostStore interface {
 		conditions map[string]interface{},
 		moreKeys ...string,
 	) (*postmodel.Post, error)
+
+	IncreaseFavoriteCount(ctx context.Context, id int) error
 }
 
 type favoriteBiz struct {
@@ -60,6 +63,16 @@ func (biz *favoriteBiz) Favorite(
 	if err := biz.store.Create(ctx, data); err != nil {
 		return common.ErrCannotCreateEntity(favoritemodel.EntityName, err)
 	}
+
+	// side effect
+	go func() {
+		defer common.AppRecover()
+		job := asyncjob.NewJob(func(ctx context.Context) error {
+			return biz.postStore.IncreaseFavoriteCount(ctx, data.PostId)
+		})
+
+		_ = asyncjob.NewGroup(true, job).Run(ctx)
+	}()
 
 	return nil
 }

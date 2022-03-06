@@ -73,6 +73,7 @@ CREATE TABLE `posts` (
   `status` int NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `favorite_count` int DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `owner_id` (`owner_id`) USING BTREE,
   KEY `category_id` (`category_id`) USING BTREE,
