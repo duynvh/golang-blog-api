@@ -9,6 +9,8 @@ import (
 	"golang-blog-api/modules/post/posttransport/ginpost"
 	"golang-blog-api/modules/upload/uploadtransport/ginupload"
 	"golang-blog-api/modules/user/usertransport/ginuser"
+	"golang-blog-api/pubsub/pblocal"
+	"golang-blog-api/subscriber"
 	"log"
 	"os"
 
@@ -19,7 +21,12 @@ import (
 )
 
 func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey string) error {
-	appCtx := component.NewAppContext(db, upProvider, secretKey)
+	appCtx := component.NewAppContext(db, upProvider, secretKey, pblocal.NewPubSub())
+
+	if err := subscriber.NewEngine(appCtx).Start(); err != nil {
+		log.Fatalln(err)
+	}
+
 	r := gin.Default()
 	r.Use(middleware.Recover(appCtx))
 

@@ -3,9 +3,9 @@ package favoritebiz
 import (
 	"context"
 	"golang-blog-api/common"
-	"golang-blog-api/component/asyncjob"
 	"golang-blog-api/modules/favorite/favoritemodel"
 	"golang-blog-api/modules/post/postmodel"
+	"golang-blog-api/pubsub"
 )
 
 type FavoriteStore interface {
@@ -23,17 +23,16 @@ type PostStore interface {
 		conditions map[string]interface{},
 		moreKeys ...string,
 	) (*postmodel.Post, error)
-
-	IncreaseFavoriteCount(ctx context.Context, id int) error
 }
 
 type favoriteBiz struct {
 	store     FavoriteStore
 	postStore PostStore
+	pubsub    pubsub.Pubsub
 }
 
-func NewFavoriteBiz(store FavoriteStore, postStore PostStore) *favoriteBiz {
-	return &favoriteBiz{store: store, postStore: postStore}
+func NewFavoriteBiz(store FavoriteStore, postStore PostStore, pubsub pubsub.Pubsub) *favoriteBiz {
+	return &favoriteBiz{store: store, postStore: postStore, pubsub: pubsub}
 }
 
 func (biz *favoriteBiz) Favorite(
@@ -65,14 +64,14 @@ func (biz *favoriteBiz) Favorite(
 	}
 
 	// side effect
-	go func() {
-		defer common.AppRecover()
-		job := asyncjob.NewJob(func(ctx context.Context) error {
-			return biz.postStore.IncreaseFavoriteCount(ctx, data.PostId)
-		})
+	// go func() {
+	// 	defer common.AppRecover()
+	// 	job := asyncjob.NewJob(func(ctx context.Context) error {
+	// 		return biz.postStore.IncreaseFavoriteCount(ctx, data.PostId)
+	// 	})
 
-		_ = asyncjob.NewGroup(true, job).Run(ctx)
-	}()
-
+	// 	_ = asyncjob.NewGroup(true, job).Run(ctx)
+	// }()
+	biz.pubsub.Publish(ctx, common.TopicUserFavoritePost, pubsub.NewMessage(data))
 	return nil
 }
