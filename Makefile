@@ -21,4 +21,7 @@ startdb:
 start:
 	@go run .
 
-.PHONY: rundb startdb migrateup buildmigrator start
+deploy:
+	@./deploy.sh
+
+.PHONY: rundb startdb migrateup buildmigrator start deploy

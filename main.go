@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"golang-blog-api/component"
 	"golang-blog-api/component/uploadprovider"
 	"golang-blog-api/middleware"
@@ -72,11 +73,16 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey
 }
 
 func main() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalln("Error loading .env file: ", err)
+	if os.Getenv("APP_ENV") == "production" {
+
+	} else {
+		if err := godotenv.Load(".env.local"); err != nil {
+			log.Fatalln("Error loading .env file: ", err)
+		}
 	}
 
-	db, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{})
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_NAME"))
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalln("Error connecting database: ", err)
 	}
