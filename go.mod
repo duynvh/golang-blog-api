@@ -9,6 +9,13 @@ require (
 )
 
 require (
+	github.com/gofrs/uuid v4.0.0+incompatible // indirect
+	github.com/gomodule/redigo v1.8.4 // indirect
+	github.com/googollee/go-socket.io v1.4.4 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
+)
+
+require (
 	github.com/aws/aws-sdk-go v1.43.10 // indirect
 	github.com/btcsuite/btcutil v1.0.2 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

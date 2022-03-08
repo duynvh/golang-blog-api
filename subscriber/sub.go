@@ -6,6 +6,7 @@ import (
 	"golang-blog-api/component"
 	"golang-blog-api/component/asyncjob"
 	"golang-blog-api/pubsub"
+	"golang-blog-api/skio"
 	"log"
 )
 
@@ -16,10 +17,11 @@ type consumerJob struct {
 
 type consumerEngine struct {
 	appCtx component.AppContext
+	rtEngine skio.RealtimeEngine
 }
 
-func NewEngine(appCtx component.AppContext) *consumerEngine {
-	return &consumerEngine{appCtx: appCtx}
+func NewEngine(appCtx component.AppContext, rtEngine skio.RealtimeEngine) *consumerEngine {
+	return &consumerEngine{appCtx: appCtx, rtEngine: rtEngine}
 }
 
 func (engine *consumerEngine) Start() error {
@@ -27,6 +29,7 @@ func (engine *consumerEngine) Start() error {
 		common.TopicUserFavoritePost,
 		true,
 		RunIncreaseFavoriteCountAfterUserFavoritesAPost(engine.appCtx),
+		EmitRealtimeAfterUserFavoritesAPost(engine.appCtx, engine.rtEngine),
 	)
 
 	engine.startSubTopic(

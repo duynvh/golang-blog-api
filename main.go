@@ -10,6 +10,7 @@ import (
 	"golang-blog-api/modules/upload/uploadtransport/ginupload"
 	"golang-blog-api/modules/user/usertransport/ginuser"
 	"golang-blog-api/pubsub/pblocal"
+	"golang-blog-api/skio"
 	"golang-blog-api/subscriber"
 	"log"
 	"os"
@@ -23,12 +24,21 @@ import (
 func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey string) error {
 	appCtx := component.NewAppContext(db, upProvider, secretKey, pblocal.NewPubSub())
 
-	if err := subscriber.NewEngine(appCtx).Start(); err != nil {
+	r := gin.Default()
+
+	rtEngine := skio.NewEngine()
+
+	if err := rtEngine.Run(appCtx, r); err != nil {
 		log.Fatalln(err)
 	}
 
-	r := gin.Default()
+	if err := subscriber.NewEngine(appCtx, rtEngine).Start(); err != nil {
+		log.Fatalln(err)
+	}
+
 	r.Use(middleware.Recover(appCtx))
+
+	r.StaticFile("/demo/", "./demo.html")
 
 	v1 := r.Group("v1")
 	v1.POST("/upload", ginupload.Upload(appCtx))
