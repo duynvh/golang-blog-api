@@ -2,7 +2,7 @@ package common
 
 import (
 	"errors"
-	"log"
+	log "golang-blog-api/log"
 )
 
 var (
@@ -11,6 +11,6 @@ var (
 
 func AppRecover() {
 	if err := recover(); err != nil {
-		log.Println("Recovery error:", err)
+		log.Error("Recovery error:", err)
 	}
 }

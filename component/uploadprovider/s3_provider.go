@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"golang-blog-api/common"
-	"log"
+	log "golang-blog-api/log"
 	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -41,7 +41,7 @@ func NewS3Provider(bucketName string, region string, apiKey string, secret strin
 	})
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	provider.session = s3Session

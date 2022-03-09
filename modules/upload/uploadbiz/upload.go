@@ -9,7 +9,7 @@ import (
 	"golang-blog-api/modules/upload/uploadmodel"
 	"image"
 	"io"
-	"log"
+	log "golang-blog-api/log"
 	"path/filepath"
 	"strings"
 	"time"
@@ -66,7 +66,7 @@ func (biz *uploadBiz) Upload(ctx context.Context, data []byte, folder, fileName 
 func getImageDimension(reader io.Reader) (int, int, error) {
 	img, _, err := image.DecodeConfig(reader)
 	if err != nil {
-		log.Println("err: ", err)
+		log.Error(err.Error())
 		return 0, 0, err
 	}
 

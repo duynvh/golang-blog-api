@@ -3,8 +3,8 @@ package pblocal
 import (
 	"context"
 	"golang-blog-api/common"
+	log "golang-blog-api/log"
 	"golang-blog-api/pubsub"
-	"log"
 	"sync"
 )
 
@@ -32,7 +32,7 @@ func (ps *localPubSub) Publish(ctx context.Context, topic pubsub.Topic, data *pu
 	go func() {
 		defer common.AppRecover()
 		ps.messageQueue <- data
-		log.Println("New event published:", data.String(), " with data", data.Data())
+		log.Print("New event published:", data.String(), " with data", data.Data())
 	}()
 
 	return nil
@@ -52,7 +52,7 @@ func (ps *localPubSub) Subscribe(ctx context.Context, topic pubsub.Topic) (ch <-
 	ps.locker.Unlock()
 
 	return c, func() {
-		log.Println("Unsubscribe")
+		log.Print("Unsubscribe")
 
 		if chans, ok := ps.mapChannel[topic]; ok {
 			for i := range chans {
@@ -70,12 +70,12 @@ func (ps *localPubSub) Subscribe(ctx context.Context, topic pubsub.Topic) (ch <-
 }
 
 func (ps *localPubSub) run() error {
-	log.Println("Pubsub started")
+	log.Print("Pubsub started")
 
 	go func() {
 		for {
 			mess := <-ps.messageQueue
-			log.Println("Message dequeue:", mess)
+			log.Print("Message dequeue:", mess)
 
 			if subs, ok := ps.mapChannel[mess.Channel()]; ok {
 				for i := range subs {

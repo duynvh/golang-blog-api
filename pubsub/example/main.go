@@ -4,7 +4,7 @@ import (
 	"context"
 	"golang-blog-api/pubsub"
 	"golang-blog-api/pubsub/pblocal"
-	"log"
+	log "golang-blog-api/log"
 	"time"
 )
 
@@ -21,14 +21,14 @@ func main() {
 
 	go func ()  {
 		for {
-			log.Println("Con1:", (<-sub1).Data())
+			log.Print("Con1:", (<-sub1).Data())
 			time.Sleep(time.Microsecond * 400)
 		}
 	}()
 
 	go func ()  {
 		for {
-			log.Println("Con1:", (<-sub2).Data())
+			log.Print("Con1:", (<-sub2).Data())
 			time.Sleep(time.Microsecond * 400)
 		}
 	}()

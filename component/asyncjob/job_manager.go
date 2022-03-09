@@ -2,7 +2,7 @@ package asyncjob
 
 import (
 	"context"
-	"log"
+	log "golang-blog-api/log"
 	"sync"
 )
 
@@ -54,7 +54,7 @@ func (g *group) Run(ctx context.Context) error {
 func (g *group) runJob(ctx context.Context, j Job) error {
 	if err := j.Execute(ctx); err != nil {
 		for {
-			log.Println(err)
+			log.Error(err)
 
 			if j.State() == StateRetryFailed {
 				return err
