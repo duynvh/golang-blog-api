@@ -4,26 +4,34 @@ import (
 	"fmt"
 	"golang-blog-api/component"
 	"golang-blog-api/component/uploadprovider"
+	"golang-blog-api/memcache"
 	"golang-blog-api/middleware"
 	"golang-blog-api/modules/category/categorytransport/gincategory"
 	"golang-blog-api/modules/favorite/favoritetransport/ginfavorite"
 	"golang-blog-api/modules/post/posttransport/ginpost"
 	"golang-blog-api/modules/upload/uploadtransport/ginupload"
+	"golang-blog-api/modules/user/userstore"
 	"golang-blog-api/modules/user/usertransport/ginuser"
 	"golang-blog-api/pubsub/pblocal"
 	"golang-blog-api/skio"
 	"golang-blog-api/subscriber"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	jg "go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey string) error {
 	appCtx := component.NewAppContext(db, upProvider, secretKey, pblocal.NewPubSub())
+	userStore := userstore.NewSQLStore(appCtx.GetMainDBConnection())
+	userCachingStore := memcache.NewUserCaching(memcache.NewCaching(), userStore)
 
 	r := gin.Default()
 
@@ -45,10 +53,10 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey
 	v1.POST("/upload", ginupload.Upload(appCtx))
 	v1.POST("/register", ginuser.Register(appCtx))
 	v1.POST("/login", ginuser.Login(appCtx))
-	v1.GET("/profile", middleware.RequireAuth(appCtx), ginuser.GetProfile(appCtx))
-	v1.GET("/favorited-posts", middleware.RequireAuth(appCtx), ginfavorite.ListFavoritedPostsOfAUser(appCtx))
+	v1.GET("/profile", middleware.RequireAuth(appCtx, userCachingStore), ginuser.GetProfile(appCtx))
+	v1.GET("/favorited-posts", middleware.RequireAuth(appCtx, userCachingStore), ginfavorite.ListFavoritedPostsOfAUser(appCtx))
 
-	categories := v1.Group("/categories", middleware.RequireAuth(appCtx))
+	categories := v1.Group("/categories", middleware.RequireAuth(appCtx, userCachingStore))
 	{
 		categories.POST("", gincategory.Create(appCtx))
 		categories.GET("/:id", gincategory.Get(appCtx))
@@ -57,19 +65,36 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey
 		categories.DELETE("/:id", gincategory.Delete(appCtx))
 	}
 
-	posts := v1.Group("/posts", middleware.RequireAuth(appCtx))
+	posts := v1.Group("/posts", middleware.RequireAuth(appCtx, userCachingStore))
 	{
 		posts.POST("", ginpost.Create(appCtx))
 		posts.GET("/:id", ginpost.Get(appCtx))
 		posts.GET("", ginpost.List(appCtx))
 		posts.PATCH("/:id", ginpost.Update(appCtx))
 		posts.DELETE("/:id", ginpost.Delete(appCtx))
-		posts.POST("/:id/favorite", middleware.RequireAuth(appCtx), ginfavorite.Favorite(appCtx))
-		posts.DELETE("/:id/unfavorite", middleware.RequireAuth(appCtx), ginfavorite.Unfavorite(appCtx))
-		posts.GET("/:id/favorited-users", middleware.RequireAuth(appCtx), ginfavorite.ListUsersFavoritedAPost(appCtx))
+		posts.POST("/:id/favorite", ginfavorite.Favorite(appCtx))
+		posts.DELETE("/:id/unfavorite", ginfavorite.Unfavorite(appCtx))
+		posts.GET("/:id/favorited-users", ginfavorite.ListUsersFavoritedAPost(appCtx))
 	}
 
-	return r.Run()
+	je, err := jg.NewExporter(jg.Options{
+		AgentEndpoint: "localhost:6831",
+		Process:       jg.Process{ServiceName: "Golang-blog-API"},
+	})
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	trace.RegisterExporter(je)
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(1)})
+
+	return http.ListenAndServe(
+		":8080",
+		&ochttp.Handler{
+			Handler: r,
+		},
+	)
 }
 
 func main() {

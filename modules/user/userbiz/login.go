@@ -6,6 +6,8 @@ import (
 	"golang-blog-api/component"
 	"golang-blog-api/component/tokenprovider"
 	"golang-blog-api/modules/user/usermodel"
+
+	"go.opencensus.io/trace"
 )
 
 type LoginStore interface {
@@ -34,14 +36,18 @@ func NewLoginBiz(store LoginStore, tokenProvider tokenprovider.Provider, hasher 
 // 3.1. Access token and refresh token
 // 4. Return token(s)
 func (biz *loginBiz) Login(ctx context.Context, data *usermodel.UserLogin) (*tokenprovider.Token, error) {
-	user, err := biz.store.FindUser(ctx, map[string]interface{}{"email": data.Email})
+	ctx1, span1 := trace.StartSpan(ctx, "user.biz.login")
+	user, err := biz.store.FindUser(ctx1, map[string]interface{}{"email": data.Email})
+	span1.End()
 
 	if err != nil {
 		return nil, usermodel.ErrUsernameOrPasswordInvalid
 	}
 
+	_, span2 := trace.StartSpan(ctx, "user.biz.login.gen-jwt")
 	passHashed := biz.hasher.Hash(data.Password + user.Salt)
 	if user.Password != passHashed {
+		span2.End()
 		return nil, usermodel.ErrUsernameOrPasswordInvalid
 	}
 
@@ -51,6 +57,7 @@ func (biz *loginBiz) Login(ctx context.Context, data *usermodel.UserLogin) (*tok
 	}
 
 	accessToken, err := biz.tokenProvider.Generate(payload, biz.expiry)
+	span2.End()
 	if err != nil {
 		return nil, common.ErrInternal(err)
 	}

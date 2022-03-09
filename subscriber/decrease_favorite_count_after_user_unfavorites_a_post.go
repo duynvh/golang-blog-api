@@ -5,6 +5,8 @@ import (
 	"golang-blog-api/component"
 	"golang-blog-api/modules/post/poststore"
 	"golang-blog-api/pubsub"
+
+	"go.opencensus.io/trace"
 )
 
 func RunDecreaseUnfavoriteCountAfterUserFavoritesAPost(appCtx component.AppContext) consumerJob {
@@ -14,7 +16,10 @@ func RunDecreaseUnfavoriteCountAfterUserFavoritesAPost(appCtx component.AppConte
 			// _ = message.Data().([]int)[0] // simulate crashes
 			store := poststore.NewSQLStore(appCtx.GetMainDBConnection())
 			postId := message.Data().(int)
-			return store.DecreaseFavoriteCount(ctx, postId)
+
+			ctx1, span := trace.StartSpan(ctx, "pubsub.sub.RunDecreaseUnfavoriteCountAfterUserFavoritesAPost")
+			defer span.End()
+			return store.DecreaseFavoriteCount(ctx1, postId)
 		},
 	}
 }

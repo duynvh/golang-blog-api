@@ -6,6 +6,8 @@ import (
 	"golang-blog-api/modules/favorite/favoritemodel"
 	"golang-blog-api/modules/post/postmodel"
 	"golang-blog-api/pubsub"
+
+	"go.opencensus.io/trace"
 )
 
 type FavoriteStore interface {
@@ -39,6 +41,13 @@ func (biz *favoriteBiz) Favorite(
 	ctx context.Context,
 	data *favoritemodel.FavoriteCreate,
 ) error {
+	_, span := trace.StartSpan(ctx, "post.biz.favorite")
+	span.AddAttributes(
+		trace.Int64Attribute("post_id", int64(data.PostId)),
+		trace.Int64Attribute("user_id", int64(data.UserId)),
+	)
+	defer span.End()
+
 	if err := data.Validate(); err != nil {
 		return err
 	}

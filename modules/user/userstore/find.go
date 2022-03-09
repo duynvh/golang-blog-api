@@ -5,6 +5,7 @@ import (
 	"golang-blog-api/common"
 	"golang-blog-api/modules/user/usermodel"
 
+	"go.opencensus.io/trace"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +14,9 @@ func (s *sqlStore) FindUser(
 	conditions map[string]interface{},
 	moreKeys ...string,
 ) (*usermodel.User, error) {
+	_, span := trace.StartSpan(ctx, "store.user.find-user")
+	defer span.End()
+	
 	var user usermodel.User
 	db := s.db
 
