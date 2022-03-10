@@ -6,6 +6,8 @@ import (
 	"golang-blog-api/modules/post/postbiz"
 	"golang-blog-api/modules/post/postmodel"
 	"golang-blog-api/modules/post/poststore"
+	"golang-blog-api/modules/post/poststore/grpcstore"
+	demo "golang-blog-api/proto"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +29,8 @@ func List(appCtx component.AppContext) gin.HandlerFunc {
 		paging.Fullfil()
 
 		store := poststore.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := postbiz.NewListBiz(store)
+		userFavoriteStore := grpcstore.NewGRPCClient(demo.NewFavoriteServiceClient(appCtx.GetGRPCClientConnection()))
+		biz := postbiz.NewListBiz(store, userFavoriteStore)
 
 		result, err := biz.List(c.Request.Context(), &filter, &paging)
 

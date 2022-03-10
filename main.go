@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"golang-blog-api/component"
 	"golang-blog-api/component/uploadprovider"
@@ -8,6 +9,7 @@ import (
 	"golang-blog-api/memcache"
 	"golang-blog-api/middleware"
 	"golang-blog-api/modules/category/categorytransport/gincategory"
+	"golang-blog-api/modules/favorite/favoritestore"
 	"golang-blog-api/modules/favorite/favoritetransport/ginfavorite"
 	"golang-blog-api/modules/post/posttransport/ginpost"
 	"golang-blog-api/modules/upload/uploadtransport/ginupload"
@@ -16,14 +18,20 @@ import (
 	"golang-blog-api/pubsub/pblocal"
 	"golang-blog-api/skio"
 	"golang-blog-api/subscriber"
+	"net"
 	"net/http"
 	"os"
 
+	demo "golang-blog-api/proto"
+
 	"github.com/gin-gonic/gin"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
 	jg "go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -101,6 +109,59 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider, secretKey
 	trace.RegisterExporter(je)
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(1)})
 
+	// setupGRPCServer(appCtx, db)
+	address := "0.0.0.0:50051"
+	lis, err := net.Listen("tcp", address)
+
+	if err != nil {
+		log.Fatalf("Error %v", err)
+	}
+
+	fmt.Printf("Server is running on %v ...\n", address)
+
+	s := grpc.NewServer()
+	gRPCStore := favoritestore.NewGRPCStore(favoritestore.NewSQLStore(db))
+	demo.RegisterFavoriteServiceServer(s, gRPCStore)
+
+	go s.Serve(lis)
+
+	opts := grpc.WithInsecure()
+	cc, err := grpc.Dial("localhost:50051", opts)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Print("Connect to gRPC server successful")
+
+	defer cc.Close()
+	appCtx.SetGRPCClientConnection(cc)
+
+	conn, err := grpc.DialContext(
+		context.Background(),
+		"0.0.0.0:50051",
+		grpc.WithBlock(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal("Failed to dial server:", err)
+	}
+
+	gwmux := runtime.NewServeMux()
+	// Register Greeter
+	err = demo.RegisterFavoriteServiceHandler(context.Background(), gwmux, conn)
+	if err != nil {
+		log.Fatal("Failed to register gateway:", err)
+	}
+
+	gwServer := &http.Server{
+		Addr:    ":8090",
+		Handler: gwmux,
+	}
+
+	log.Print("Serving gRPC-Gateway on http://0.0.0.0:8090")
+	go gwServer.ListenAndServe()
+
 	return http.ListenAndServe(
 		":8080",
 		&ochttp.Handler{
@@ -133,3 +194,32 @@ func main() {
 		log.Fatal("Error running service: ", err)
 	}
 }
+
+// func setupGRPCServer(appCtx component.AppContext, db *gorm.DB) {
+// 	address := "0.0.0.0:50051"
+// 	lis, err := net.Listen("tcp", address)
+
+// 	if err != nil {
+// 		log.Fatalf("Error %v", err)
+// 	}
+
+// 	fmt.Printf("Server is running on %v ...\n", address)
+
+// 	s := grpc.NewServer()
+// 	gRPCStore := favoritestore.NewGRPCStore(favoritestore.NewSQLStore(db))
+// 	demo.RegisterFavoriteServiceServer(s, gRPCStore)
+
+// 	go s.Serve(lis)
+
+// 	opts := grpc.WithInsecure()
+// 	cc, err := grpc.Dial("localhost:50051", opts)
+
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	log.Print("Connect to gRPC server successful")
+
+// 	defer cc.Close()
+// 	appCtx.SetGRPCClientConnection(cc)
+// }

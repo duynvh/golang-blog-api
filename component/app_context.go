@@ -4,6 +4,7 @@ import (
 	"golang-blog-api/component/uploadprovider"
 	"golang-blog-api/pubsub"
 
+	"google.golang.org/grpc"
 	"gorm.io/gorm"
 )
 
@@ -12,13 +13,16 @@ type AppContext interface {
 	UploadProvider() uploadprovider.UploadProvider
 	SecretKey() string
 	GetPubsub() pubsub.Pubsub
+	GetGRPCClientConnection() grpc.ClientConnInterface
+	SetGRPCClientConnection(grpc.ClientConnInterface)
 }
 
 type appCtx struct {
-	db         *gorm.DB
-	upProvider uploadprovider.UploadProvider
-	secret     string
-	pb         pubsub.Pubsub
+	db                   *gorm.DB
+	upProvider           uploadprovider.UploadProvider
+	secret               string
+	pb                   pubsub.Pubsub
+	grpcClientConnection grpc.ClientConnInterface
 }
 
 func NewAppContext(db *gorm.DB, upProvider uploadprovider.UploadProvider, secret string, pb pubsub.Pubsub) *appCtx {
@@ -39,4 +43,12 @@ func (ctx *appCtx) SecretKey() string {
 
 func (ctx *appCtx) GetPubsub() pubsub.Pubsub {
 	return ctx.pb
+}
+
+func (ctx *appCtx) GetGRPCClientConnection() grpc.ClientConnInterface {
+	return ctx.grpcClientConnection
+}
+
+func (ctx *appCtx) SetGRPCClientConnection(c grpc.ClientConnInterface) {
+	ctx.grpcClientConnection = c
 }

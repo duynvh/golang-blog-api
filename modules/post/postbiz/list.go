@@ -4,6 +4,7 @@ import (
 	"context"
 	"golang-blog-api/common"
 	"golang-blog-api/modules/post/postmodel"
+	"log"
 )
 
 type ListStore interface {
@@ -16,12 +17,17 @@ type ListStore interface {
 	) ([]postmodel.Post, error)
 }
 
-type listBiz struct {
-	store ListStore
+type UserFavoritedStore interface {
+	GetFavoriteCountOfPosts(ctx context.Context, ids []int) (map[int]int, error)
 }
 
-func NewListBiz(store ListStore) *listBiz {
-	return &listBiz{store: store}
+type listBiz struct {
+	store              ListStore
+	userFavoritedStore UserFavoritedStore
+}
+
+func NewListBiz(store ListStore, userFavoritedStore UserFavoritedStore) *listBiz {
+	return &listBiz{store: store, userFavoritedStore: userFavoritedStore}
 }
 
 func (biz *listBiz) List(
@@ -33,6 +39,22 @@ func (biz *listBiz) List(
 
 	if err != nil {
 		return nil, common.ErrCannotListEntity(postmodel.EntityName, err)
+	}
+
+	ids := make([]int, len(result))
+
+	for i := range result {
+		ids[i] = result[i].Id
+	}
+
+	mapResFavorited, err := biz.userFavoritedStore.GetFavoriteCountOfPosts(ctx, ids)
+
+	if err != nil {
+		log.Println("Cannot get post favorited:", err)
+	}
+
+	for i, item := range result {
+		result[i].FavoriteCount = mapResFavorited[item.Id]
 	}
 
 	return result, nil

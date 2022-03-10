@@ -4,6 +4,7 @@ import (
 	"context"
 	"golang-blog-api/common"
 	"golang-blog-api/modules/favorite/favoritemodel"
+	"log"
 )
 
 type SqlData struct {
@@ -24,6 +25,7 @@ func (s *sqlStore) GetFavoriteCountOfPosts(
 		Where("post_id in (?)", postIds).
 		Group("post_id").
 		Find(&listFavorite).Error; err != nil {
+			log.Fatal(err)
 		return nil, common.ErrDB(err)
 	}
 

@@ -50,13 +50,13 @@ func main() {
 	}
 
 	if err := job2.Execute(context.Background()); err != nil {
-		log.Println("Job 2 err:", err)
+		log.Print("Job 2 err:", err)
 		for {
 			if err := job2.Retry(context.Background()); err == nil {
 				break
 			}
 
-			log.Println("Job 2 err", err)
+			log.Print("Job 2 err", err)
 			if job2.State() == asyncjob.StateRetryFailed {
 				break
 			}

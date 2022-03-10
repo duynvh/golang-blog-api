@@ -1,0 +1,39 @@
+time="2022-03-10T15:26:26.8158626+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T15:26:40.5242524+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:02:41.2015944+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:02:41.2353314+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T16:03:03.7672011+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:03:03.7892184+07:00" level=info msg="\nConnect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T16:08:24.5712818+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:08:24.6028067+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T16:12:50.6322999+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:12:50.6532446+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T16:15:05.956102+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:15:05.9796501+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T16:20:52.9463069+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:20:52.9679722+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T16:21:49.4978209+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:21:49.5185593+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T16:21:55.1710053+07:00" level=info msg="[2 1]" file="D:/codes/go/golang-blog-api/modules/post/poststore/grpcstore/grpc_store.go" line=27
+time="2022-03-10T16:22:18.0393577+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:22:18.0638719+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T16:22:27.1324167+07:00" level=info msg="<nil>" file="D:/codes/go/golang-blog-api/modules/post/poststore/grpcstore/grpc_store.go" line=29
+time="2022-03-10T16:24:17.8308781+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T16:24:17.852619+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T17:11:23.4049488+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T17:11:23.4240752+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T17:18:43.6329998+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T17:18:43.6545526+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=168
+time="2022-03-10T17:22:13.4799938+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T17:22:13.5055275+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=168
+time="2022-03-10T17:23:05.3279371+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T17:23:05.3529175+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=167
+time="2022-03-10T17:25:17.3399152+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T17:25:17.3618581+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=132
+time="2022-03-10T17:25:39.8361494+07:00" level=info msg="New event published:Message TopicUserFavoritePost with data&{2022-03-10 17:25:39.801 +0700 +07 4 1}" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=35
+time="2022-03-10T17:25:39.8361494+07:00" level=info msg="Message dequeue:Message TopicUserFavoritePost" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=78
+time="2022-03-10T17:40:38.7859001+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T17:40:38.8061177+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=135
+time="2022-03-10T17:41:16.1808061+07:00" level=info msg="Pubsub started" file="D:/codes/go/golang-blog-api/pubsub/pblocal/local_pubsub.go" line=73
+time="2022-03-10T17:41:16.202791+07:00" level=info msg="Connect to gRPC server successful" file="D:/codes/go/golang-blog-api/main.go" line=135
+time="2022-03-10T17:41:16.2111245+07:00" level=info msg="Serving gRPC-Gateway on http://0.0.0.0:8090" file="D:/codes/go/golang-blog-api/main.go" line=162
