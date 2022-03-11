@@ -35,7 +35,7 @@ func (biz *updateBiz) Update(ctx context.Context, id int, data *categorymodel.Ca
 	}
 
 	if err := data.Validate(); err != nil {
-		return err
+		return common.ErrInvalidRequest(err)
 	}
 
 	if err := biz.store.Update(ctx, id, data); err != nil {

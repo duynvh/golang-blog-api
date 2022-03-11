@@ -20,7 +20,7 @@ func NewCreateBiz(store CreateStore) *createBiz {
 
 func (biz *createBiz) Create(ctx context.Context, data *categorymodel.CategoryCreate) error {
 	if err := data.Validate(); err != nil {
-		return err
+		return common.ErrInvalidRequest(err)
 	}
 
 	if err := biz.store.Create(ctx, data); err != nil {
